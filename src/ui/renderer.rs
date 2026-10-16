@@ -33,11 +33,23 @@ fn font() -> Option<&'static Font> {
     .as_ref()
 }
 
-fn rounded_rect(pm: &mut Pixmap, x: f32, y: f32, w: f32, h: f32, _radius: f32, color: Color) {
-    let Some(rect) = Rect::from_xywh(x, y, w, h) else {
+fn rounded_rect(pm: &mut Pixmap, x: f32, y: f32, w: f32, h: f32, radius: f32, color: Color) {
+    if Rect::from_xywh(x, y, w, h).is_none() {
         return;
-    };
-    let path = PathBuilder::from_rect(rect);
+    }
+    let radius = radius.clamp(0.0, w.min(h) / 2.0);
+    let mut builder = PathBuilder::new();
+    builder.move_to(x + radius, y);
+    builder.line_to(x + w - radius, y);
+    builder.quad_to(x + w, y, x + w, y + radius);
+    builder.line_to(x + w, y + h - radius);
+    builder.quad_to(x + w, y + h, x + w - radius, y + h);
+    builder.line_to(x + radius, y + h);
+    builder.quad_to(x, y + h, x, y + h - radius);
+    builder.line_to(x, y + radius);
+    builder.quad_to(x, y, x + radius, y);
+    builder.close();
+    let Some(path) = builder.finish() else { return };
     let mut paint = Paint::default();
     paint.set_color(color);
     pm.fill_path(
@@ -47,6 +59,22 @@ fn rounded_rect(pm: &mut Pixmap, x: f32, y: f32, w: f32, h: f32, _radius: f32, c
         Transform::identity(),
         None,
     );
+}
+
+fn text_width(value: &str, size: f32) -> f32 {
+    font()
+        .map(|font| {
+            value
+                .chars()
+                .map(|character| font.metrics(character, size).advance_width)
+                .sum()
+        })
+        .unwrap_or(0.0)
+}
+
+fn centered_text(pm: &mut Pixmap, value: &str, y: f32, size: f32, color: Color) {
+    let x = ((pm.width() as f32 - text_width(value, size)) / 2.0).max(0.0);
+    text(pm, value, x, y, size, color);
 }
 
 fn text(pm: &mut Pixmap, value: &str, x: f32, y: f32, size: f32, color: Color) {
@@ -188,7 +216,7 @@ pub fn render(
         Some(BrowserId::Edge) => "Switch to Edge",
         None => "Browser unavailable",
     };
-    text(&mut pm, label, 34.0, 86.0, 10.0, rgba(255, 255, 255, 255));
+    centered_text(&mut pm, label, 85.0, 12.0, rgba(255, 255, 255, 255));
     Ok(pm)
 }
 
