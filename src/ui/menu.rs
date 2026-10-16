@@ -13,6 +13,7 @@ pub enum MenuAction {
     OpenSettings,
     Refresh,
     ToggleLock,
+    ToggleAlwaysOnTop,
     ToggleStartup,
     SetTheme(ThemePreference),
     SetOpacity(u8),
@@ -31,6 +32,7 @@ pub struct ContextMenu {
     settings: MenuItem,
     refresh: MenuItem,
     lock: CheckMenuItem,
+    always_on_top: CheckMenuItem,
     startup: CheckMenuItem,
     themes: Vec<(CheckMenuItem, ThemePreference)>,
     opacities: Vec<(CheckMenuItem, u8)>,
@@ -82,6 +84,7 @@ impl ContextMenu {
         let settings = MenuItem::new("Open Windows Default Apps", true, None);
         let refresh = MenuItem::new("Refresh status", true, None);
         let lock = CheckMenuItem::new("Lock position", true, config.window_locked, None);
+        let always_on_top = CheckMenuItem::new("Always on top", true, config.always_on_top, None);
         let startup =
             CheckMenuItem::new("Start with Windows", true, config.start_with_windows, None);
         let theme_menu = Submenu::new("Theme", true);
@@ -136,6 +139,7 @@ impl ContextMenu {
             &refresh,
             &PredefinedMenuItem::separator(),
             &lock,
+            &always_on_top,
             &startup,
             &theme_menu,
             &opacity_menu,
@@ -156,6 +160,7 @@ impl ContextMenu {
             settings,
             refresh,
             lock,
+            always_on_top,
             startup,
             themes,
             opacities,
@@ -182,6 +187,8 @@ impl ContextMenu {
             Some(MenuAction::Refresh)
         } else if id == self.lock.id() {
             Some(MenuAction::ToggleLock)
+        } else if id == self.always_on_top.id() {
+            Some(MenuAction::ToggleAlwaysOnTop)
         } else if id == self.startup.id() {
             Some(MenuAction::ToggleStartup)
         } else if id == self.show_hide.id() {

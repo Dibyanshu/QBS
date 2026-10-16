@@ -118,8 +118,13 @@ fn main() -> Result<()> {
         .with_resizable(false)
         .with_decorations(false)
         .with_transparent(false)
-        .with_always_on_top(true)
+        .with_always_on_top(config.always_on_top)
         .with_visible(true);
+    #[cfg(windows)]
+    {
+        use tao::platform::windows::WindowBuilderExtWindows;
+        builder = builder.with_skip_taskbar(true);
+    }
     if let Some(position) = position {
         builder = builder.with_position(position);
     }
@@ -163,7 +168,7 @@ fn main() -> Result<()> {
     }
 
     let mut cursor = (0.0, 0.0);
-    let mut drag_origin: Option<(PhysicalPosition<i32>, (f64, f64))> = None;
+    let mut dragging = false;
     let mut visible = true;
     window.request_redraw();
     event_loop.run(move |event, _target, control_flow| {
@@ -209,6 +214,11 @@ fn main() -> Result<()> {
                         }
                         MenuAction::ToggleLock => {
                             config.window_locked = !config.window_locked;
+                            let _ = config::save(&config);
+                        }
+                        MenuAction::ToggleAlwaysOnTop => {
+                            config.always_on_top = !config.always_on_top;
+                            window.set_always_on_top(config.always_on_top);
                             let _ = config::save(&config);
                         }
                         MenuAction::ToggleStartup => {
@@ -267,14 +277,6 @@ fn main() -> Result<()> {
                 }
                 WindowEvent::CursorMoved { position, .. } => {
                     cursor = (position.x, position.y);
-                    if let Some((origin, start)) = drag_origin {
-                        let dx = cursor.0 - start.0;
-                        let dy = cursor.1 - start.1;
-                        window.set_outer_position(PhysicalPosition::new(
-                            origin.x + dx as i32,
-                            origin.y + dy as i32,
-                        ));
-                    }
                 }
                 WindowEvent::MouseInput {
                     state: ElementState::Pressed,
@@ -288,9 +290,7 @@ fn main() -> Result<()> {
                             window.request_redraw();
                         }
                     } else if !config.window_locked {
-                        if let Ok(origin) = window.outer_position() {
-                            drag_origin = Some((origin, cursor));
-                        }
+                        dragging = window.drag_window().is_ok();
                     }
                 }
                 WindowEvent::MouseInput {
@@ -298,7 +298,7 @@ fn main() -> Result<()> {
                     button: MouseButton::Left,
                     ..
                 } => {
-                    if drag_origin.take().is_some() {
+                    if std::mem::take(&mut dragging) {
                         if let Ok(position) = window.outer_position() {
                             #[cfg(windows)]
                             let (x, y) = {

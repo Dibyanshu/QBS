@@ -2,7 +2,7 @@ use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::PathBuf};
 
-pub const CONFIG_VERSION: u32 = 1;
+pub const CONFIG_VERSION: u32 = 2;
 
 #[derive(Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
@@ -34,6 +34,7 @@ pub struct Config {
     pub window_x: Option<i32>,
     pub window_y: Option<i32>,
     pub window_locked: bool,
+    pub always_on_top: bool,
     pub theme: ThemePreference,
     #[serde(default = "default_opacity")]
     pub opacity: f32,
@@ -50,6 +51,7 @@ impl Default for Config {
             window_x: None,
             window_y: None,
             window_locked: false,
+            always_on_top: true,
             theme: ThemePreference::System,
             opacity: default_opacity(),
             start_with_windows: false,
@@ -99,6 +101,7 @@ mod tests {
         assert_eq!(c.switch_mode, SwitchMode::Supported);
         assert!(!c.experimental_warning_acknowledged);
         assert!(!c.start_with_windows);
+        assert!(c.always_on_top);
     }
 
     #[test]
@@ -107,5 +110,6 @@ mod tests {
         assert!(c.window_locked);
         assert_eq!(c.switch_mode, SwitchMode::Supported);
         assert_eq!(c.version, CONFIG_VERSION);
+        assert!(c.always_on_top);
     }
 }

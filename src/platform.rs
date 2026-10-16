@@ -50,13 +50,25 @@ pub fn style_widget_window(hwnd: isize, opacity: f32) -> Result<()> {
         DwmSetWindowAttribute, DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND,
     };
     use windows::Win32::UI::WindowsAndMessaging::{
-        GetWindowLongW, SetLayeredWindowAttributes, SetWindowLongW, GWL_EXSTYLE, LWA_ALPHA,
-        WS_EX_LAYERED,
+        GetWindowLongW, SetLayeredWindowAttributes, SetWindowLongW, SetWindowPos, GWL_EXSTYLE,
+        LWA_ALPHA, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER,
+        WS_EX_APPWINDOW, WS_EX_LAYERED, WS_EX_TOOLWINDOW,
     };
 
     unsafe {
         let style = GetWindowLongW(hwnd, GWL_EXSTYLE);
-        SetWindowLongW(hwnd, GWL_EXSTYLE, style | WS_EX_LAYERED.0 as i32);
+        let style = (style | WS_EX_LAYERED.0 as i32 | WS_EX_TOOLWINDOW.0 as i32)
+            & !(WS_EX_APPWINDOW.0 as i32);
+        SetWindowLongW(hwnd, GWL_EXSTYLE, style);
+        SetWindowPos(
+            hwnd,
+            None,
+            0,
+            0,
+            0,
+            0,
+            SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED,
+        )?;
         SetLayeredWindowAttributes(
             hwnd,
             Default::default(),

@@ -12,9 +12,9 @@ use std::sync::OnceLock;
 use tiny_skia::{Color, Paint, PathBuilder, Pixmap, Rect, Transform};
 use tray_icon::Icon;
 
-pub const WIDTH: u32 = 330;
-pub const HEIGHT: u32 = 176;
-pub const BUTTON: (f32, f32, f32, f32) = (18.0, 108.0, 294.0, 48.0);
+pub const WIDTH: u32 = 169;
+pub const HEIGHT: u32 = 120;
+pub const BUTTON: (f32, f32, f32, f32) = (10.0, 78.0, 149.0, 30.0);
 
 fn rgba(r: u8, g: u8, b: u8, a: u8) -> Color {
     Color::from_rgba8(r, g, b, a)
@@ -126,23 +126,23 @@ pub fn render(
         0.0,
         WIDTH as f32,
         HEIGHT as f32,
-        18.0,
+        10.0,
         background,
     );
     text(
         &mut pm,
         "QUICK BROWSER SWITCHER",
-        18.0,
-        14.0,
-        12.0,
+        10.0,
+        9.0,
+        8.0,
         rgba(64, 126, 255, 255),
     );
     text(
         &mut pm,
         snapshot.current.label(),
-        18.0,
-        40.0,
-        25.0,
+        10.0,
+        27.0,
+        17.0,
         foreground,
     );
     let status = feedback
@@ -155,20 +155,24 @@ pub fn render(
                 SwitchMode::Experimental => "Experimental silent mode",
             },
         });
-    let status = if status.chars().count() > 54 {
-        format!("{}…", status.chars().take(53).collect::<String>())
+    let status = if status.chars().count() > 27 {
+        format!("{}…", status.chars().take(26).collect::<String>())
     } else {
         status.to_string()
     };
-    text(&mut pm, &status, 18.0, 76.0, 13.0, muted);
+    text(&mut pm, &status, 10.0, 52.0, 9.0, muted);
     let target = snapshot.target();
     let available = target
         .and_then(|id| snapshot.browser(id))
         .is_some_and(|b| b.installed);
     let button_color = if available {
-        rgba(55, 116, 255, 255)
+        if light {
+            rgba(63, 63, 70, 255)
+        } else {
+            rgba(82, 82, 91, 255)
+        }
     } else {
-        rgba(75, 83, 99, 210)
+        rgba(113, 113, 122, 180)
     };
     rounded_rect(
         &mut pm,
@@ -176,15 +180,15 @@ pub fn render(
         BUTTON.1,
         BUTTON.2,
         BUTTON.3,
-        13.0,
+        8.0,
         button_color,
     );
     let label = match target {
-        Some(BrowserId::Chrome) => "Switch to Google Chrome",
-        Some(BrowserId::Edge) => "Switch to Microsoft Edge",
-        None => "No registered browser available",
+        Some(BrowserId::Chrome) => "Switch to Chrome",
+        Some(BrowserId::Edge) => "Switch to Edge",
+        None => "Browser unavailable",
     };
-    text(&mut pm, label, 45.0, 120.0, 17.0, rgba(255, 255, 255, 255));
+    text(&mut pm, label, 34.0, 86.0, 10.0, rgba(255, 255, 255, 255));
     Ok(pm)
 }
 

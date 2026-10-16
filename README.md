@@ -20,8 +20,10 @@ branding, UI, and source code.
   verification and automatic recovery through Windows Settings.
 - Discovers browsers from Windows Registered Applications and Capabilities;
   installation paths and ProgIDs are not hard-coded.
-- Supports dragging, edge snapping, position locking, remembered placement,
+- Uses a compact 169×120 card and supports dragging, edge snapping, position locking, remembered placement,
   light/dark/system themes, and 60%, 75%, 90%, or 100% opacity.
+- Can be kept above other windows or used as a normal non-topmost window.
+- Stays out of the taskbar while remaining available from the tray.
 - Uses an event-driven loop with no continuous high-frequency polling.
 - Includes single-instance protection, optional per-user autostart, portable
   distribution, and a per-user installer.
@@ -90,6 +92,7 @@ Status refreshes after a switch attempt, when the card regains focus, and when
 | Open Windows Default Apps | Opens the general Default Apps page |
 | Refresh status | Re-reads registrations and all four associations |
 | Lock position | Prevents accidental dragging |
+| Always on top | Toggles whether the card stays above normal windows |
 | Start with Windows | Adds or removes the current-user startup entry |
 | Theme | Selects System, Light, or Dark |
 | Opacity | Selects 60%, 75%, 90%, or 100% |
@@ -167,9 +170,9 @@ Preferences are stored in:
 ```
 
 The versioned schema stores switching mode, warning acknowledgement, window
-position, lock state, theme, opacity, autostart preference, and last selected
+position, lock state, always-on-top preference, theme, opacity, autostart preference, and last selected
 browser. Defaults are supported mode, no acknowledgement, unlocked position,
-system theme, 90% opacity, and autostart disabled. Missing fields in older or
+always on top, system theme, 90% opacity, and autostart disabled. Missing fields in older or
 partial files receive safe defaults.
 
 Diagnostics are disabled by default. To enable local logging:
