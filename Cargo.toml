@@ -1,0 +1,60 @@
+[package]
+name = "quick-browser-switcher"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.86"
+description = "Native Windows 11 widget for switching between Chrome and Edge"
+license = "MIT"
+
+[[bin]]
+name = "qbs"
+path = "src/main.rs"
+
+[[bin]]
+name = "qbs-cli"
+path = "src/bin/qbs-cli.rs"
+
+[lib]
+name = "qbs"
+path = "src/lib.rs"
+
+[dependencies]
+anyhow = "1"
+base64 = "0.22"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+dirs = "6"
+fontdue = "0.9"
+md-5 = "0.10"
+muda = "0.20"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+softbuffer = "0.4"
+tao = { version = "0.37", features = ["rwh_06"] }
+tiny-skia = "0.11"
+toml = "0.8"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tray-icon = "0.25"
+
+[target.'cfg(windows)'.dependencies]
+winreg = "0.55"
+windows = { version = "0.62", features = [
+  "Win32_Foundation",
+  "Win32_Graphics_Dwm",
+  "Win32_Graphics_Gdi",
+  "Win32_Security",
+  "Win32_Security_Authorization",
+  "Win32_System_Registry",
+  "Win32_System_Threading",
+  "Win32_System_SystemInformation",
+  "Win32_UI_Shell",
+  "Win32_UI_WindowsAndMessaging",
+] }
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
